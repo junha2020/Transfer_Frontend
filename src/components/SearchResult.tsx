@@ -34,7 +34,7 @@ export default function SearchResult({
   const route = apiResult.routes[0];
   const leg = route.leg[0];
 
-  const depatruteTime = leg.departure_time?.text || "??:??";
+  const departureTime = leg.departure_time?.text || "??:??";
   const arrivalTime = leg.arrival_time?.text || "??:??";
   const originalFare = route.fare ? route.fare.text : "0엔";
 
@@ -105,13 +105,129 @@ export default function SearchResult({
                   루트 1
                 </span>
                 <span className="text-xl font-bold">
-                  {depatruteTime}{" "}
+                  {departureTime}{" "}
                   <span className="text-gray-400 font-normal text-sm">→</span>{" "}
                   <span className="text-[#eb7d23]">{arrivalTime}</span>
                 </span>
               </div>
+              <div className="text-right text-sm text-gray-600 font-medium">
+                환승: {transferCount}회
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="bg-[#e11d48] text-white text-[10px] px-1 rounded">
+                도착이 빠른 순
+              </span>
+              <span className="bg-[#1875d6] text-white text-[10px] px-1 rounded">
+                환승이 적은 순
+              </span>
+              <span className="text-gray-500 font-medium ml-1">
+                교통카드 우선:
+              </span>
+              {isPassApplied ? (
+                <div className="flex items-center gap-1">
+                  <span className="line-through text-gray-400">
+                    {originalFare}
+                  </span>
+                  <span className="font-bold text-[#377b38] bg-green-100 px-1">
+                    0엔 (패스 적용)
+                  </span>
+                </div>
+              ) : (
+                <span className="font-bold text-lg">{originalFare}</span>
+              )}
             </div>
           </div>
+
+          {/* 타임라인 바디 */}
+          <div className="p-0">
+            {/* 출발역 */}
+            <div className="flex bg-[#f2f6fa] border-b border-gray-200">
+              <div className="w-16 flex items-center justify-center font-bold text-lg text-gray-800">
+                {departureTime}
+              </div>
+              <div className="w-8 flex flex-col items-center">
+                <div className="h-4 w-1 bg-transparent"></div>
+                <div className="w-5 h-5 bg-gray-500 text-white text-[10px] flex items-center justify-center rounded-sm">
+                  발
+                </div>
+                <div className="flex-1 w-2 bg-[#539755] mt-1"></div>
+              </div>
+              <div className="flex-1 py-3 pr-3 pl-2 font-bold text-lg text-[#1875d6] flex items-center gap-2">
+                {searchData.origin}
+                <span className="text-[10px] text-gray-400 font-normal bg-white border px-1 rounded">
+                  날씨
+                </span>
+              </div>
+            </div>
+
+            {/* 노선 및 아코디언 */}
+            <div className="flex bg-white relative">
+              <div className="w-16 flex items-center justify-center py-6">
+                <button
+                  type="button"
+                  onClick={() => setIsStopsOpen(!isStopsOpen)}
+                  className="w-10 h-6 border border-gray-300 flex items-center justify-center text-[10px] text-gray-600 bg-[##f9f9f9] z-10 shadow-sm hover:bg-gray-100 rounded"
+                >
+                  {numStops} 역
+                </button>
+              </div>
+              <div className="w-8 flex flex-col items-center">
+                <div className="h-full w-2 bg-[#539755]"></div>
+              </div>
+              <div className="flex-1 py-4 pr-3 pl-2">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                  <div>
+                    <div className="text-sm font-bold flex items-center gap-1.5 text-[#333]">
+                      <span className="bg-[#539755] text-white text-[10px] px-1 rounded-sm">
+                        🚇
+                      </span>
+                      {lineName}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-[#333] text-sm">
+                      {isPassApplied ? "0엔" : originalFare}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 중간 정차역 디테일 */}
+            {isStopsOpen && (
+              <div className="flex bg-gray-50 relative border-y border-gray-100">
+                <div className="w-16 flex items-center justify-end pr-2 text-xs text-gray-500"></div>
+                <div className="w-8 flex flex-col items-center relative">
+                  <div className="absolute top-0 bottom-0 w-2 bg-[#539755]"></div>
+                  <div className="w-2.5 h-2.5 bg-white border-[3px] border-[#539755] rounded-full z-10 my-2"></div>
+                </div>
+                <div className="flex-1 py-2 pr-3 pl-2 text-xs text-gray-500">
+                  구글 API 세부 정차역 데이터 렌더링 구역
+                </div>
+              </div>
+            )}
+
+            {/* 도착역 */}
+            <div className="flex bg-[#f2f6fa] border-t border-gray-200">
+              <div className="w-16 flex items-center justify-center font-bold text-lg text-gray-800">
+                {arrivalTime}
+              </div>
+              <div className="w-8 flex flex-col items-center">
+                <div className="h-3 w-2 bg-[#539755] mb-1"></div>
+                <div className="w-5 h-5 bg-gray-500 text-white text-[10px] flex items-center justify-center rounded-sm">
+                  착
+                </div>
+                <div className="flex-1 w-1 bg-transparent"></div>
+              </div>
+              <div className="flex-1 py-3 pr-3 pl-2 font-bold text-lg text-[#1875d6]">
+                {searchData.destination}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="text-center py-6 text-xs text-gray-400">
+          ※ 결과 데이터는 Spring Boot 서버 및 구글 API에서 가져왔습니다.
         </div>
       </div>
     </div>
