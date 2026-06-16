@@ -27,25 +27,36 @@ export default function App() {
     passId: "",
   });
   const [apiResult, setApiResult] = useState<RouteResponseData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSearchSubmit = async (data: SearchData) => {
+    setIsLoading(true);
+    setSearchData(data);
+
     try {
       const response = await axios.post(
         "http://localhost:8080/api/v1/routes/calculate",
         data,
       );
-      setSearchData(data);
       setApiResult(response.data);
       setView("result");
     } catch (error) {
       console.error(error);
       alert("서버가 꺼져있습니다.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      {view === "form" && <SearchForm onSubmit={handleSearchSubmit} />}
+      {view === "form" && (
+        <SearchForm
+          initialData={searchData}
+          onSubmit={handleSearchSubmit}
+          isLoading={isLoading}
+        />
+      )}
       {view === "result" && (
         <SearchResult searchData={searchData} onBack={() => setView("form")} />
       )}
